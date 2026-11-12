@@ -1,0 +1,11 @@
+{# Autovervollständigung über /api/pokemon/. Parameter: name, label, value (Identifier), display (Anzeigename) #}
+<div class="pokemon-picker position-relative">
+    {% if label %}<label class="form-label fw-semibold">{{ label }}</label>{% endif %}
+    <div class="input-group">
+        <span class="input-group-text p-1 picker-preview">{% if sprite %}<img src="{{ sprite }}" alt="">{% else %}<i class="bi bi-search px-2"></i>{% endif %}</span>
+        <input type="text" class="form-control picker-input" placeholder="Pokémon suchen …" autocomplete="off"
+               value="{{ display|default:'' }}" {% if required %}required{% endif %}>
+    </div>
+    <input type="hidden" name="{{ name }}" class="picker-value" value="{{ value|default:'' }}">
+    <div class="list-group picker-results shadow" hidden></div>
+</div>

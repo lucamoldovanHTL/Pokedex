@@ -1,0 +1,172 @@
+:root {
+    --dex-red: #dc0a2d;
+    --dex-red-dark: #a3071f;
+    --dex-dark: #1f1f2e;
+    --bs-link-color: #c40a29;
+    --bs-link-hover-color: #8a0019;
+}
+
+body { background: #f4f5f7; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+
+/* ---------- Navigation & Footer ---------- */
+.navbar-dex { background: linear-gradient(90deg, var(--dex-red-dark), var(--dex-red)); }
+.navbar-dex .nav-link.active { font-weight: 600; }
+.footer-dex { background: var(--dex-dark); }
+
+.pokeball-icon {
+    display: inline-block; width: 26px; height: 26px; border-radius: 50%;
+    border: 3px solid #222; position: relative; flex-shrink: 0;
+    background: linear-gradient(to bottom, var(--dex-red) 0 44%, #222 44% 56%, #fff 56% 100%);
+    vertical-align: middle;
+}
+.pokeball-icon::after {
+    content: ''; position: absolute; width: 36%; height: 36%; top: 32%; left: 32%;
+    background: #fff; border: 2px solid #222; border-radius: 50%;
+}
+.pokeball-icon.sm { width: 16px; height: 16px; border-width: 2px; }
+.pokeball-icon.sm::after { border-width: 1px; }
+.pokeball-icon.lg { width: 48px; height: 48px; }
+.pokeball-icon.muted { opacity: .15; }
+
+/* ---------- Typ-Badges ---------- */
+.type-badge {
+    --type-color: #888;
+    display: inline-block; background: var(--type-color); color: #fff !important;
+    padding: .25em .8em; border-radius: 999px; font-size: .85rem; font-weight: 600;
+    text-decoration: none; text-shadow: 0 1px 1px rgba(0,0,0,.35); line-height: 1.4;
+    white-space: nowrap; transition: filter .15s;
+}
+a.type-badge:hover { filter: brightness(1.1); }
+.type-badge.sm { font-size: .7rem; padding: .15em .6em; }
+.type-badge.lg { font-size: 1rem; padding: .35em 1.1em; }
+.type-badge.faded { opacity: .25; }
+.type-badge.vertical { font-size: .65rem; padding: .2em .4em; }
+
+/* ---------- Startseite ---------- */
+.hero-dex {
+    background: radial-gradient(circle at 85% 20%, rgba(255,255,255,.12), transparent 40%),
+                linear-gradient(135deg, var(--dex-red-dark), var(--dex-red) 55%, #ff4d5f);
+    padding-bottom: 2rem;
+}
+.text-white-75 { color: rgba(255,255,255,.85); }
+.hero-search .form-control { border: 0; }
+.featured-card {
+    background: linear-gradient(160deg, color-mix(in srgb, var(--type-color) 70%, #000), var(--type-color));
+    border-radius: 1.25rem; padding: 1.25rem; box-shadow: 0 1rem 2.5rem rgba(0,0,0,.25);
+    transition: transform .2s;
+}
+.featured-card:hover { transform: translateY(-4px) rotate(-.5deg); }
+.featured-img { max-height: 260px; display: block; margin: 0 auto; filter: drop-shadow(0 10px 15px rgba(0,0,0,.3)); }
+.mt-n4 { margin-top: -1.5rem; }
+.stat-tile { background: #fff; border-radius: 1rem; padding: 1rem 1.25rem; box-shadow: 0 .25rem .75rem rgba(0,0,0,.06); }
+.stat-value { font-size: 1.75rem; font-weight: 800; color: var(--dex-red); }
+.stat-label { font-size: .85rem; color: #6c757d; }
+.gen-card { transition: transform .15s, box-shadow .15s; border-left: 4px solid var(--dex-red) !important; }
+.gen-card:hover { transform: translateY(-2px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.1) !important; }
+
+/* ---------- Pokémon-Karten ---------- */
+.pokemon-card { border-radius: 1rem; overflow: hidden; transition: transform .15s, box-shadow .15s; }
+.pokemon-card:hover { transform: translateY(-4px); box-shadow: 0 .75rem 1.5rem rgba(0,0,0,.12) !important; }
+.pokemon-card-img {
+    background: radial-gradient(circle at 50% 60%, color-mix(in srgb, var(--type-color) 35%, #fff), #fff 70%);
+    aspect-ratio: 1; display: flex; align-items: center; justify-content: center; position: relative;
+}
+.pokemon-card-img img { width: 85%; height: 85%; object-fit: contain; }
+.fav-mark { position: absolute; top: .5rem; right: .6rem; color: var(--dex-red); }
+
+/* ---------- Detailseite ---------- */
+.detail-hero {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--type-color) 85%, #000), var(--type-color-2));
+}
+.detail-img { max-height: 340px; filter: drop-shadow(0 15px 20px rgba(0,0,0,.35)); }
+.detail-flavor { max-width: 40rem; }
+.stat-row { display: flex; align-items: center; gap: .75rem; margin-bottom: .5rem; }
+.stat-name { width: 9rem; font-size: .9rem; color: #555; flex-shrink: 0; }
+.stat-num { width: 2.5rem; text-align: right; font-weight: 700; flex-shrink: 0; }
+.stat-row .progress { height: .6rem; border-radius: 1rem; background: #eceff3; }
+.profile-list dt { font-weight: 500; color: #666; }
+.move-table th { font-size: .8rem; color: #666; font-weight: 600; }
+
+.evo-chain { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: .5rem; }
+.evo-stage { display: flex; flex-direction: column; gap: .5rem; }
+.evo-arrow { color: #aaa; font-size: 1.5rem; }
+.evo-item {
+    display: block; text-align: center; text-decoration: none; color: inherit; padding: .5rem 1rem;
+    border-radius: 1rem; transition: background .15s; min-width: 120px;
+}
+.evo-item:hover { background: #f1f3f5; }
+.evo-item.current { background: #fff0f2; outline: 2px solid var(--dex-red); }
+.evo-item img { width: 96px; height: 96px; object-fit: contain; }
+.evo-trigger { font-size: .75rem; color: #777; max-width: 160px; margin: 0 auto; }
+
+/* ---------- Typen-Tabelle ---------- */
+.type-chart td { width: 2.2rem; height: 2.2rem; font-weight: 700; font-size: .85rem; padding: 0; }
+.eff-double { background: #c8f2c2 !important; color: #1a6b12; }
+.eff-half { background: #ffd6d6 !important; color: #a11; }
+.eff-0 { background: #3a3a3a !important; color: #fff; }
+.legend { display: inline-block; width: 1rem; height: 1rem; border-radius: 3px; vertical-align: -2px; }
+
+/* ---------- Kampf ---------- */
+.battle-card { border-top: 5px solid var(--type-color) !important; transition: transform .2s; }
+.battle-card.is-winner { box-shadow: 0 0 0 3px #ffc107, 0 1rem 2rem rgba(0,0,0,.12) !important; }
+.battle-img { width: 180px; height: 180px; object-fit: contain; }
+.result-banner.winner { background: linear-gradient(90deg, #fff8e1, #fff, #fff8e1); }
+.compare-row { display: grid; grid-template-columns: 1fr 9rem 1fr; align-items: center; gap: .5rem; margin-bottom: .4rem; }
+.compare-label { text-align: center; font-size: .85rem; color: #555; }
+.compare-bar { display: flex; align-items: center; gap: .4rem; height: 1.2rem; }
+.compare-bar.left { flex-direction: row-reverse; }
+.compare-bar > div { height: .7rem; background: #ced4da; border-radius: 1rem; }
+.compare-bar > div.lead { background: var(--dex-red); }
+.compare-bar span { font-weight: 700; font-size: .85rem; min-width: 2rem; }
+.compare-bar.left span { text-align: right; }
+
+/* ---------- Picker (Autovervollständigung) ---------- */
+.picker-results { position: absolute; z-index: 1050; left: 0; right: 0; max-height: 320px; overflow-y: auto; }
+.picker-results .list-group-item { display: flex; align-items: center; gap: .5rem; cursor: pointer; }
+.picker-results .list-group-item.active { background: var(--dex-red); border-color: var(--dex-red); }
+.picker-results img, .picker-preview img { width: 36px; height: 36px; object-fit: contain; image-rendering: pixelated; }
+.picker-preview { min-width: 46px; justify-content: center; background: #fff; }
+
+/* ---------- Trainer ---------- */
+.empty-box { background: #fff; border: 2px dashed #dee2e6; border-radius: 1rem; padding: 2rem; text-align: center; color: #6c757d; }
+.empty-slot { border: 2px dashed #dee2e6; border-radius: 1rem; display: flex; align-items: center; justify-content: center; min-height: 200px; background: #fafbfc; }
+.team-card { border-radius: 1rem; transition: transform .15s, box-shadow .15s; }
+.team-card:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.1) !important; }
+.team-sprites { display: flex; flex-wrap: wrap; min-height: 56px; }
+.team-sprites img { width: 56px; height: 56px; image-rendering: pixelated; }
+.remove-member { position: absolute; top: .4rem; left: .4rem; z-index: 3; }
+.nickname-tag { position: absolute; bottom: -.6rem; left: 50%; transform: translateX(-50%); z-index: 3;
+    background: var(--dex-dark); color: #fff; font-size: .75rem; padding: .1rem .6rem; border-radius: 999px; white-space: nowrap; }
+.count-pill { display: inline-block; min-width: 1.6rem; border-radius: 999px; font-weight: 700; font-size: .8rem; padding: .05rem .4rem; }
+.count-pill.bad { background: #ffd6d6; color: #a11; }
+.count-pill.good { background: #c8f2c2; color: #1a6b12; }
+.count-pill.neutral { background: #e2e3e5; color: #333; }
+.member-moves { position: absolute; top: .4rem; right: .4rem; z-index: 3; font-size: .75rem; font-weight: 600; }
+
+/* ---------- Arena (Online-Kampf) ---------- */
+.arena-img { width: 190px; height: 190px; object-fit: contain; filter: drop-shadow(0 8px 10px rgba(0,0,0,.2)); transition: opacity .3s, filter .3s; }
+.arena-img.fainted { filter: grayscale(1); opacity: .35; }
+.arena-hp { height: .9rem; border-radius: 1rem; background: #eceff3; max-width: 320px; margin: 0 auto; }
+.arena-hp .progress-bar { transition: width .5s ease; }
+.arena-roster { display: flex; justify-content: center; flex-wrap: wrap; gap: .15rem; }
+.arena-roster img { width: 44px; height: 44px; image-rendering: pixelated; border-radius: 50%; border: 2px solid transparent; }
+.arena-roster img.current { border-color: var(--dex-red); background: #fff0f2; }
+.arena-roster img.fainted { filter: grayscale(1); opacity: .3; }
+.move-btn { background: var(--type-color); color: #fff; border: 0; text-align: left; padding: .6rem .9rem; border-radius: .75rem;
+    text-shadow: 0 1px 1px rgba(0,0,0,.35); transition: transform .1s, filter .1s; }
+.move-btn:hover, .move-btn:focus-visible { color: #fff; background: var(--type-color); filter: brightness(1.1); transform: translateY(-2px); }
+.move-btn:disabled { color: #fff; background: var(--type-color); opacity: .5; }
+.move-btn small { opacity: .9; font-size: .75rem; }
+.switch-btn img { width: 32px; height: 32px; image-rendering: pixelated; margin: -6px 0; }
+.arena-log { max-height: 260px; overflow-y: auto; font-size: .9rem; }
+.arena-log-turn { font-size: .75rem; font-weight: 700; color: #888; text-transform: uppercase; margin-top: .5rem; border-bottom: 1px solid #eee; }
+.arena-log-line.ko, .arena-log-line.end { font-weight: 700; }
+.arena-log-line.ko { color: #a11; }
+.arena-log-line.good { color: #1a6b12; }
+.arena-log-line.bad, .arena-log-line.miss, .arena-log-line.switch { color: #777; }
+.arena-log-line.crit { color: #b26a00; font-weight: 600; }
+.rank-badge { display: inline-block; min-width: 1.8rem; text-align: center; border-radius: 999px; font-weight: 700; font-size: .85rem;
+    padding: .1rem .4rem; background: #e9ecef; color: #333; margin-right: .3rem; }
+.rank-badge.rank-1 { background: #ffd54a; }
+.rank-badge.rank-2 { background: #cfd4da; }
+.rank-badge.rank-3 { background: #e0a878; }

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Attacken · {{ member }}{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width: 900px">
+    <a href="{{ team.get_absolute_url }}" class="small text-decoration-none"><i class="bi bi-arrow-left"></i> zurück zu „{{ team.name }}“</a>
+    <div class="d-flex align-items-center gap-3 my-3">
+        <img src="{{ member.pokemon.sprite }}" alt="" width="96" height="96" style="image-rendering: pixelated">
+        <div>
+            <h1 class="h3 fw-bold mb-1">Attacken für {{ member }}</h1>
+            <div class="d-flex gap-1">{% for type in member.pokemon.types %}{% include 'includes/type_badge.html' with small=True %}{% endfor %}</div>
+        </div>
+    </div>
+    <p class="text-muted">
+        Wähle bis zu <strong>{{ max_moves }} Attacken</strong>, die {{ member }} in der Arena einsetzen kann.
+        Ohne Auswahl werden automatisch diese verwendet:
+        {% for m in auto %}<span class="type-badge sm" style="--type-color: {{ m.type.color }}">{{ m.name }}</span> {% empty %}<em>Verzweifler</em>{% endfor %}
+    </p>
+
+    {% if pool %}
+    <form method="post" id="moveForm" data-max="{{ max_moves }}">{% csrf_token %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-body d-flex flex-wrap gap-2 align-items-center sticky-top bg-white rounded-top" style="top: 56px; z-index: 5">
+                <input type="search" id="moveFilter" class="form-control form-control-sm" style="max-width: 16rem" placeholder="Attacke oder Typ filtern …">
+                <span class="ms-auto fw-semibold"><span id="moveCount">0</span>/{{ max_moves }} gewählt</span>
+                <button class="btn btn-danger btn-sm"><i class="bi bi-check-lg"></i> Speichern</button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm align-middle mb-0 move-table">
+                    <thead><tr><th></th><th>Attacke</th><th>Typ</th><th>Art</th><th class="text-end">Stärke</th><th class="text-end">Genauigkeit</th></tr></thead>
+                    <tbody>
+                    {% for m in pool %}
+                    <tr data-search="{{ m.name|lower }} {{ m.type.name|lower }}">
+                        <td class="ps-3"><input class="form-check-input move-check" type="checkbox" name="moves" value="{{ m.id }}" id="mv{{ m.id }}" {% if m.id in chosen_ids %}checked{% endif %}></td>
+                        <td><label for="mv{{ m.id }}" class="fw-semibold mb-0 d-block" style="cursor: pointer">{{ m.name }}</label></td>
+                        <td>{% include 'includes/type_badge.html' with type=m.type small=True %}</td>
+                        <td class="small text-muted">{{ m.damage_class }}</td>
+                        <td class="text-end fw-bold">{{ m.power }}</td>
+                        <td class="text-end">{% if m.accuracy %}{{ m.accuracy }} %{% else %}–{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+    {% else %}
+    <div class="empty-box">Für dieses Pokémon sind keine Schadensattacken hinterlegt. Es kämpft mit „Verzweifler“.</div>
+    {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+    var form = document.getElementById('moveForm');
+    if (!form) return;
+    var max = parseInt(form.dataset.max, 10), boxes = form.querySelectorAll('.move-check');
+    function update() {
+        var n = form.querySelectorAll('.move-check:checked').length;
+        document.getElementById('moveCount').textContent = n;
+        boxes.forEach(function (b) { b.disabled = !b.checked && n >= max; });
+    }
+    boxes.forEach(function (b) { b.addEventListener('change', update); });
+    document.getElementById('moveFilter').addEventListener('input', function () {
+        var q = this.value.trim().toLowerCase();
+        form.querySelectorAll('tbody tr').forEach(function (tr) {
+            tr.hidden = q && tr.dataset.search.indexOf(q) === -1;
+        });
+    });
+    update();
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Rangliste{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-0"><i class="bi bi-list-ol text-danger"></i> Rangliste</h1>
+            <div class="text-muted">Die besten Trainer der Arena (Elo-Wertung, Start bei 1000 Punkten).</div>
+        </div>
+        <a href="{% url 'arena:lobby' %}" class="btn btn-danger"><i class="bi bi-lightning-charge-fill"></i> Jetzt kämpfen</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead><tr><th class="ps-3">Rang</th><th>Trainer</th><th class="text-end">Punkte</th>
+                            <th class="text-end">Siege</th><th class="text-end">Niederl.</th><th class="text-end pe-3">Quote</th></tr></thead>
+                        <tbody>
+                        {% for r in ratings %}
+                        <tr class="{% if r.user_id == user.id %}table-warning{% endif %}">
+                            <td class="ps-3"><span class="rank-badge rank-{{ forloop.counter }}">{{ forloop.counter }}</span></td>
+                            <td class="fw-semibold">{{ r.user.username }}{% if r.user_id == user.id %} <span class="small text-muted">(du)</span>{% endif %}</td>
+                            <td class="text-end fw-bold">{{ r.elo }}</td>
+                            <td class="text-end text-success">{{ r.wins }}</td>
+                            <td class="text-end text-danger">{{ r.losses }}</td>
+                            <td class="text-end pe-3">{{ r.win_rate }} %</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="text-center text-muted py-4">Noch keine gewerteten Kämpfe – sei der Erste!</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm"><div class="card-body">
+                <h2 class="h5 fw-bold">Letzte Kämpfe</h2>
+                {% for b in recent %}
+                <div class="border-bottom py-2 small">
+                    <span class="{% if b.winner_id == b.player1_id %}fw-bold{% endif %}">{{ b.player1.username }}</span>
+                    <span class="text-muted">vs.</span>
+                    <span class="{% if b.winner_id == b.player2_id %}fw-bold{% endif %}">{{ b.player2.username }}</span>
+                    <div class="text-muted">
+                        {% if b.winner %}<i class="bi bi-trophy-fill text-warning"></i> {{ b.winner.username }}{% else %}Unentschieden{% endif %}
+                        · {{ b.reason_label }} · {{ b.finished_at|date:'d.m. H:i' }}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-muted small">Noch keine Kämpfe.</div>
+                {% endfor %}
+            </div></div>
+        </div>
+    </div>
+</div>
+{% endblock %}

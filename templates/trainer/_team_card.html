@@ -1,0 +1,16 @@
+{# Erwartet: team (mit vorgeladenen members) #}
+<a href="{{ team.get_absolute_url }}" class="card team-card border-0 shadow-sm h-100 text-decoration-none text-dark">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <div class="fw-bold">{{ team.name }}</div>
+                {% if show_owner %}<div class="small text-muted">von {{ team.user.username }}</div>{% endif %}
+            </div>
+            {% if team.is_public %}<span class="badge text-bg-light"><i class="bi bi-globe"></i> öffentlich</span>{% endif %}
+        </div>
+        {% if team.description %}<div class="small text-muted mt-1">{{ team.description }}</div>{% endif %}
+        <div class="team-sprites mt-2">
+            {% for m in team.members.all %}<img src="{{ m.pokemon.sprite }}" alt="{{ m.pokemon.display_name }}" title="{{ m }}" loading="lazy">{% endfor %}        </div>
+        <div class="small text-muted mt-1">{{ team.members.all|length }}/6 Pokémon</div>
+    </div>
+</a>

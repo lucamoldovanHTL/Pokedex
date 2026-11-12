@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Anmelden{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width: 440px">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <div class="text-center mb-4"><span class="pokeball-icon lg"></span><h1 class="h4 fw-bold mt-2">Anmelden</h1></div>
+            {% if request.login_throttled %}<div class="alert alert-warning small">Zu viele Fehlversuche. Bitte warte 5 Minuten und versuche es dann erneut.</div>
+            {% elif form.errors %}<div class="alert alert-danger small">Benutzername oder Passwort falsch.</div>{% endif %}
+            <form method="post">{% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+                <div class="mb-3">
+                    <label class="form-label" for="id_username">Benutzername</label>
+                    <input type="text" name="username" id="id_username" class="form-control" required autofocus value="{{ form.username.value|default:'' }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="id_password">Passwort</label>
+                    <input type="password" name="password" id="id_password" class="form-control" required>
+                </div>
+                <button class="btn btn-danger w-100">Anmelden</button>
+            </form>
+            <p class="text-center small mt-3 mb-0">Noch kein Konto? <a href="{% url 'trainer:signup' %}">Jetzt registrieren</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

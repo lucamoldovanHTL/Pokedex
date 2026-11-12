@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load pokedex_tags %}
+{% block title %}Typen-Tabelle{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h1 class="h3 fw-bold">Typen-Tabelle</h1>
+    <p class="text-muted">Zeile = angreifender Typ, Spalte = verteidigender Typ. Leere Felder bedeuten normalen Schaden (1×).</p>
+    <div class="table-responsive card border-0 shadow-sm p-2">
+        <table class="table table-bordered table-sm text-center align-middle type-chart mb-0">
+            <thead>
+                <tr>
+                    <th class="small text-muted">ANG ↓ / VER →</th>
+                    {% for t in types %}<th><span class="type-badge vertical" style="--type-color: {{ t.color }}" title="{{ t.name }}">{{ t.name|slice:':3' }}</span></th>{% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in matrix %}
+                <tr>
+                    <th class="text-start">{% include 'includes/type_badge.html' with type=row.attacker small=True %}</th>
+                    {% for m in row.cells %}<td class="{{ m|mult_class }}">{{ m|mult }}</td>{% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="d-flex gap-3 small mt-3">
+        <span><span class="legend eff-double"></span> sehr effektiv (2×)</span>
+        <span><span class="legend eff-half"></span> nicht sehr effektiv (½×)</span>
+        <span><span class="legend eff-0"></span> wirkungslos (0×)</span>
+    </div>
+</div>
+{% endblock %}

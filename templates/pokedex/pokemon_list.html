@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Pokédex{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-baseline flex-wrap gap-2 mb-3">
+        <h1 class="h3 fw-bold mb-0">Pokédex</h1>
+        <span class="text-muted">{{ page.paginator.count }} Treffer</span>
+    </div>
+
+    <form class="card border-0 shadow-sm mb-4" method="get">
+        <div class="card-body row g-2 align-items-end">
+            <div class="col-12 col-md-4 col-lg-3">
+                <label class="form-label small fw-semibold">Suche</label>
+                <input type="search" name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Name oder Nummer">
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <label class="form-label small fw-semibold">Typ</label>
+                <select name="type" class="form-select">
+                    <option value="">Alle</option>
+                    {% for t in types %}<option value="{{ t.identifier }}" {% if request.GET.type == t.identifier %}selected{% endif %}>{{ t.name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <label class="form-label small fw-semibold">2. Typ</label>
+                <select name="type2" class="form-select">
+                    <option value="">Egal</option>
+                    {% for t in types %}<option value="{{ t.identifier }}" {% if request.GET.type2 == t.identifier %}selected{% endif %}>{{ t.name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <label class="form-label small fw-semibold">Generation</label>
+                <select name="gen" class="form-select">
+                    <option value="">Alle</option>
+                    {% for g in generations %}<option value="{{ g.id }}" {% if request.GET.gen == g.id|stringformat:'s' %}selected{% endif %}>{{ g.name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-4 col-lg-1">
+                <label class="form-label small fw-semibold">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">Alle</option>
+                    <option value="legendary" {% if request.GET.status == 'legendary' %}selected{% endif %}>Legendär</option>
+                    <option value="mythical" {% if request.GET.status == 'mythical' %}selected{% endif %}>Mysteriös</option>
+                    <option value="baby" {% if request.GET.status == 'baby' %}selected{% endif %}>Baby</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <label class="form-label small fw-semibold">Sortierung</label>
+                <select name="sort" class="form-select">
+                    {% for key, label in sort_options %}<option value="{{ key }}" {% if sort == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-6 col-md-4 col-lg-auto d-flex flex-column">
+                <div class="form-check mb-1">
+                    <input class="form-check-input" type="checkbox" name="forms" value="1" id="forms" {% if show_forms %}checked{% endif %}>
+                    <label class="form-check-label small" for="forms">Formen</label>
+                </div>
+                <button class="btn btn-danger"><i class="bi bi-funnel"></i> Filtern</button>
+            </div>
+        </div>
+    </form>
+
+    {% if page.object_list %}
+    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
+        {% for p in page.object_list %}
+        <div class="col">{% include 'includes/pokemon_card.html' with is_fav=p.is_fav %}</div>
+        {% endfor %}
+    </div>
+    {% include 'includes/pagination.html' %}
+    {% else %}
+    <div class="text-center text-muted py-5">
+        <i class="bi bi-emoji-frown display-4"></i>
+        <p class="mt-3">Kein Pokémon gefunden. Versuch es mit anderen Filtern.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

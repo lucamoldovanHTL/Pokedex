@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load pokedex_tags %}
+{% block title %}Kampf-Simulator{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h1 class="h3 fw-bold">Kampf-Simulator</h1>
+    <p class="text-muted">Wähle zwei Pokémon. Simuliert wird ein Duell auf Level 50 mit der jeweils besten Attacke des eigenen Typs (Stärke 80, mit Typ-Bonus).</p>
+
+    <form method="get" class="card border-0 shadow-sm mb-4">
+        <div class="card-body row g-3 align-items-end">
+            <div class="col-md-5">{% include 'includes/pokemon_picker.html' with name='a' label='Dein Pokémon' value=a_ident display=a.display_name sprite=a.sprite required=True %}</div>
+            <div class="col-md-auto text-center fw-bold fs-4 text-danger d-none d-md-block pb-1">VS</div>
+            <div class="col-md-5">{% include 'includes/pokemon_picker.html' with name='b' label='Gegner' value=b_ident display=b.display_name sprite=b.sprite required=True %}</div>
+            <div class="col-md">
+                <button class="btn btn-danger w-100"><i class="bi bi-lightning-charge-fill"></i> Kämpfen!</button>
+            </div>
+        </div>
+    </form>
+
+    {% if error %}<div class="alert alert-warning">{{ error }}</div>{% endif %}
+
+    {% if result %}
+    <div class="row g-4 align-items-stretch">
+        {% include 'pokedex/_battle_side.html' with p=result.a atk=result.atk_a hits=result.hits_a pct=result.pct_a hp=result.hp_a %}
+        <div class="col-lg-2 d-flex flex-column justify-content-center text-center">
+            <div class="display-6 fw-bold text-danger">VS</div>
+            <div class="small text-muted">{% if result.a_first %}{{ result.a.display_name }}{% else %}{{ result.b.display_name }}{% endif %} greift zuerst an</div>
+        </div>
+        {% include 'pokedex/_battle_side.html' with p=result.b atk=result.atk_b hits=result.hits_b pct=result.pct_b hp=result.hp_b %}
+    </div>
+
+    <div class="card border-0 shadow-sm mt-4 result-banner {% if result.winner %}winner{% endif %}">
+        <div class="card-body text-center">
+            {% if result.winner %}
+            <i class="bi bi-trophy-fill text-warning fs-1"></i>
+            <h2 class="h4 fw-bold mb-1">{{ result.winner.display_name }} gewinnt!</h2>
+            <p class="text-muted mb-0">
+                {{ result.a.display_name }} braucht {{ result.hits_a|default:'∞' }} Treffer, {{ result.b.display_name }} braucht {{ result.hits_b|default:'∞' }} Treffer.
+            </p>
+            {% else %}
+            <h2 class="h4 fw-bold mb-0">Unentschieden – keiner kann dem anderen schaden.</h2>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-body">
+            <h2 class="h5 fw-bold mb-3">Werte im Vergleich</h2>
+            {% for row in result.stat_rows %}
+            <div class="compare-row">
+                <div class="compare-bar left"><div style="width: {{ row.a|percent:row.max }}%" class="{% if row.a >= row.b %}lead{% endif %}"></div><span>{{ row.a }}</span></div>
+                <div class="compare-label">{{ row.label }}</div>
+                <div class="compare-bar right"><div style="width: {{ row.b|percent:row.max }}%" class="{% if row.b >= row.a %}lead{% endif %}"></div><span>{{ row.b }}</span></div>
+            </div>
+            {% endfor %}
+            <div class="compare-row fw-bold">
+                <div class="text-end pe-2">{{ result.a.total }}</div><div class="compare-label">Gesamt</div><div class="ps-2">{{ result.b.total }}</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

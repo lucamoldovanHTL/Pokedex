@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Registrieren{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width: 480px">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <div class="text-center mb-4"><span class="pokeball-icon lg"></span><h1 class="h4 fw-bold mt-2">Trainerkonto erstellen</h1></div>
+            <form method="post" novalidate>{% csrf_token %}
+                {% include 'includes/form_fields.html' %}
+                <button class="btn btn-danger w-100">Registrieren</button>
+            </form>
+            <p class="text-center small mt-3 mb-0">Schon registriert? <a href="{% url 'trainer:login' %}">Anmelden</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,1 @@
+<a href="{% url 'pokedex:list' %}?type={{ type.identifier }}" class="type-badge{% if small %} sm{% endif %}" style="--type-color: {{ type.color }}">{{ type.name }}</a>

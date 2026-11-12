@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}Arena{% endblock %}
+{% block content %}
+<div class="container py-4" id="lobby" data-status-url="{% url 'arena:lobby_status' %}"
+     data-invites="{{ invites|length }}" data-battle="{{ current.pk|default:'' }}">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-0"><i class="bi bi-trophy-fill text-warning"></i> Kampf-Arena</h1>
+            <div class="text-muted">Tritt online mit deinem Team gegen andere Trainer an.</div>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <div class="stat-tile py-2 text-center">
+                <div class="stat-value" style="font-size: 1.4rem">{{ rating.elo|default:1000 }}</div>
+                <div class="stat-label">Punkte · {{ rating.wins|default:0 }} S / {{ rating.losses|default:0 }} N</div>
+            </div>
+            <a href="{% url 'arena:leaderboard' %}" class="btn btn-outline-dark"><i class="bi bi-list-ol"></i> Rangliste</a>
+        </div>
+    </div>
+
+    {% if current %}
+    <div class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span><i class="bi bi-lightning-charge-fill"></i>
+            {% if current.status == 'open' %}Du wartest gerade auf einen Gegner.{% else %}Du hast einen laufenden Kampf!{% endif %}</span>
+        <a href="{{ current.get_absolute_url }}" class="btn btn-warning btn-sm fw-bold">Zum Kampf</a>
+    </div>
+    {% endif %}
+
+    {% for inv in invites %}
+    <form method="post" action="{% url 'arena:challenge_accept' inv.pk %}" class="alert alert-info d-flex align-items-center flex-wrap gap-2">{% csrf_token %}
+        <span class="me-auto"><i class="bi bi-envelope-exclamation-fill"></i> <strong>{{ inv.player1.username }}</strong> fordert dich heraus!</span>
+        <select name="team" class="form-select form-select-sm w-auto" required aria-label="Team">
+            {% for t in teams %}<option value="{{ t.pk }}">{{ t.name }} ({{ t.n }})</option>{% endfor %}
+        </select>
+        <button class="btn btn-success btn-sm" {% if not teams or current %}disabled{% endif %}>Annehmen</button>
+        <button class="btn btn-outline-secondary btn-sm" formaction="{% url 'arena:challenge_decline' inv.pk %}" formnovalidate>Ablehnen</button>
+    </form>
+    {% endfor %}
+
+    {% if not teams %}
+    <div class="empty-box mb-4">Du brauchst ein Team mit mindestens einem Pokémon.
+        <a href="{% url 'trainer:team_create' %}">Erstelle jetzt dein Team!</a></div>
+    {% else %}
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <form method="post" action="{% url 'arena:queue_join' %}" class="card border-0 shadow-sm h-100">{% csrf_token %}
+                <div class="card-body">
+                    <h2 class="h5 fw-bold"><i class="bi bi-search text-danger"></i> Zufälliger Gegner</h2>
+                    <p class="small text-muted">Du wirst mit dem nächsten wartenden Trainer verbunden.
+                        {% if waiting %}<span class="badge text-bg-success">{{ waiting }} Trainer wartet gerade</span>{% endif %}</p>
+                    <label class="form-label fw-semibold" for="queueTeam">Dein Team</label>
+                    <select name="team" id="queueTeam" class="form-select mb-3" required>
+                        {% for t in teams %}<option value="{{ t.pk }}" {% if t.pk|stringformat:'s' == preselect %}selected{% endif %}>{{ t.name }} ({{ t.n }} Pokémon)</option>{% endfor %}
+                    </select>
+                    <button class="btn btn-danger w-100" {% if current %}disabled{% endif %}><i class="bi bi-lightning-charge-fill"></i> Gegner suchen</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-lg-6">
+            <form method="post" action="{% url 'arena:challenge' %}" class="card border-0 shadow-sm h-100">{% csrf_token %}
+                <div class="card-body">
+                    <h2 class="h5 fw-bold"><i class="bi bi-person-plus-fill text-danger"></i> Trainer herausfordern</h2>
+                    <p class="small text-muted">Dein Gegner sieht die Herausforderung in seiner Arena und kann sie annehmen.</p>
+                    <div class="row g-2 mb-3">
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold" for="opponent">Trainername</label>
+                            <input type="text" name="opponent" id="opponent" class="form-control" required maxlength="150" autocomplete="off">
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold" for="challengeTeam">Dein Team</label>
+                            <select name="team" id="challengeTeam" class="form-select" required>
+                                {% for t in teams %}<option value="{{ t.pk }}" {% if t.pk|stringformat:'s' == preselect %}selected{% endif %}>{{ t.name }} ({{ t.n }} Pokémon)</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline-danger w-100" {% if current %}disabled{% endif %}><i class="bi bi-send-fill"></i> Herausfordern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100"><div class="card-body">
+                <h2 class="h5 fw-bold">Meine letzten Kämpfe</h2>
+                {% for b in history %}
+                <a href="{{ b.get_absolute_url }}" class="d-flex justify-content-between align-items-center border-bottom py-2 text-decoration-none text-dark">
+                    <span>
+                        {% if b.winner_id == user.id %}<span class="badge text-bg-success">Sieg</span>
+                        {% elif b.winner_id %}<span class="badge text-bg-danger">Niederlage</span>
+                        {% else %}<span class="badge text-bg-secondary">Remis</span>{% endif %}
+                        gegen <strong>{% if b.player1_id == user.id %}{{ b.player2.username }}{% else %}{{ b.player1.username }}{% endif %}</strong>
+                        <span class="small text-muted">· {{ b.reason_label }}</span>
+                    </span>
+                    <span class="small text-muted">{{ b.finished_at|date:'d.m. H:i' }}</span>
+                </a>
+                {% empty %}
+                <div class="text-muted small">Noch keine Kämpfe. Los geht's!</div>
+                {% endfor %}
+            </div></div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100"><div class="card-body">
+                <h2 class="h5 fw-bold">Top 5</h2>
+                {% for r in top %}
+                <div class="d-flex justify-content-between border-bottom py-2">
+                    <span><span class="rank-badge rank-{{ forloop.counter }}">{{ forloop.counter }}</span> {{ r.user.username }}</span>
+                    <strong>{{ r.elo }}</strong>
+                </div>
+                {% empty %}
+                <div class="text-muted small">Die Rangliste ist noch leer.</div>
+                {% endfor %}
+                <a href="{% url 'arena:leaderboard' %}" class="small d-inline-block mt-2">Ganze Rangliste ansehen</a>
+            </div></div>
+        </div>
+    </div>
+
+    <p class="small text-muted mt-4 mb-0"><i class="bi bi-info-circle"></i>
+        Regeln: Level 50, ein Pokémon gleichzeitig im Kampf. Beide Trainer wählen pro Runde gleichzeitig eine Attacke oder einen Wechsel
+        (60 Sekunden Bedenkzeit). Die Attacken legst du vorher auf der Team-Seite fest.</p>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+    var el = document.getElementById('lobby');
+    setInterval(function () {
+        fetch(el.dataset.statusUrl).then(function (r) { return r.json(); }).then(function (s) {
+            if (String(s.invites) !== el.dataset.invites || String(s.battle || '') !== el.dataset.battle) location.reload();
+        }).catch(function () {});
+    }, 3000);
+})();
+</script>
+{% endblock %}

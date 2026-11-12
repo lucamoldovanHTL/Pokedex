@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %}{{ team.name }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-0">{{ team.name }}</h1>
+            <div class="text-muted small">
+                von {{ team.user.username }} · {{ members|length }}/6 Pokémon
+                {% if members %} · Ø Gesamtwerte {{ avg_total }}{% endif %}
+                {% if team.is_public %} · <i class="bi bi-globe"></i> öffentlich{% endif %}
+            </div>
+            {% if team.description %}<p class="mt-2 mb-0">{{ team.description }}</p>{% endif %}
+        </div>
+        {% if is_owner %}
+        <div class="d-flex gap-2">
+            {% if members %}<a class="btn btn-danger btn-sm" href="{% url 'arena:lobby' %}?team={{ team.pk }}"><i class="bi bi-trophy"></i> In die Arena</a>{% endif %}
+            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#editTeam"><i class="bi bi-pencil"></i> Bearbeiten</button>
+            <button class="btn btn-outline-danger btn-sm" data-bs-toggle="collapse" data-bs-target="#deleteTeam"><i class="bi bi-trash"></i> Löschen</button>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if is_owner %}
+    <div class="collapse mb-4" id="editTeam">
+        <form method="post" action="{% url 'trainer:team_update' team.pk %}" class="card card-body border-0 shadow-sm">{% csrf_token %}
+            {% include 'includes/form_fields.html' %}
+            <div><button class="btn btn-danger btn-sm">Speichern</button></div>
+        </form>
+    </div>
+    <div class="collapse mb-4" id="deleteTeam">
+        <form method="post" action="{% url 'trainer:team_delete' team.pk %}" class="alert alert-danger d-flex justify-content-between align-items-center flex-wrap gap-2">{% csrf_token %}
+            <span>Team „{{ team.name }}“ wirklich endgültig löschen?</span>
+            <button class="btn btn-danger btn-sm">Ja, löschen</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3 mb-4">
+        {% for m in members %}
+        <div class="col">
+            <div class="position-relative h-100">
+                {% include 'includes/pokemon_card.html' with p=m.pokemon %}
+                {% if m.nickname %}<div class="nickname-tag">„{{ m.nickname }}“</div>{% endif %}
+                {% if is_owner %}
+                <form method="post" action="{% url 'trainer:team_remove' team.pk m.pk %}" class="remove-member">{% csrf_token %}
+                    <button class="btn btn-sm btn-light rounded-circle shadow-sm" title="Entfernen" aria-label="{{ m }} entfernen"><i class="bi bi-x-lg"></i></button>
+                </form>
+                <a href="{% url 'trainer:member_moves' team.pk m.pk %}" class="member-moves btn btn-sm btn-light rounded-pill shadow-sm"
+                   title="Attacken für die Arena wählen{% for mv in m.moves.all %}{% if forloop.first %}: {% else %}, {% endif %}{{ mv.name }}{% endfor %}">
+                    <i class="bi bi-lightning-charge-fill text-warning"></i> {% if m.moves.all %}{{ m.moves.all|length }}/4{% else %}Auto{% endif %}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% for _ in empty_slots %}
+        <div class="col"><div class="empty-slot h-100"><span class="pokeball-icon lg muted"></span></div></div>
+        {% endfor %}
+    </div>
+
+    {% if is_owner and members %}
+    <p class="small text-muted"><i class="bi bi-lightning-charge-fill text-warning"></i> Über den Blitz-Knopf legst du für jedes Pokémon bis zu 4 Attacken für die Arena fest. „Auto“ = die stärksten Attacken werden automatisch gewählt.</p>
+    {% endif %}
+
+    {% if is_owner and members|length < 6 %}
+    <form method="post" action="{% url 'trainer:team_add' team.pk %}" class="card border-0 shadow-sm mb-4">{% csrf_token %}
+        <div class="card-body row g-2 align-items-end">
+            <div class="col-md-6">{% include 'includes/pokemon_picker.html' with name='pokemon' label='Pokémon hinzufügen' required=True %}</div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold" for="nickname">Spitzname <span class="text-muted fw-normal">(optional)</span></label>
+                <input type="text" name="nickname" id="nickname" maxlength="30" class="form-control">
+            </div>
+            <div class="col-md-3"><button class="btn btn-danger w-100"><i class="bi bi-plus-lg"></i> Hinzufügen</button></div>
+        </div>
+    </form>
+    {% endif %}
+
+    {% if analysis %}
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h2 class="h5 fw-bold">Defensive Analyse</h2>
+                    <p class="small text-muted">Wie viele Teammitglieder sind gegen Angriffe des jeweiligen Typs schwach oder resistent?</p>
+                    {% if analysis.threats %}
+                    <div class="alert alert-warning small py-2">
+                        <i class="bi bi-exclamation-triangle"></i> Gefährlich: mindestens 3 Schwächen und keine Resistenz gegen
+                        {% for t in analysis.threats %}<strong>{{ t.name }}</strong>{% if not forloop.last %}, {% endif %}{% endfor %}.
+                    </div>
+                    {% endif %}
+                    <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0 analysis-table">
+                        <thead><tr><th>Angriffstyp</th><th class="text-center">Schwach</th><th class="text-center">Resistent</th><th class="text-center">Immun</th></tr></thead>
+                        <tbody>
+                        {% for r in analysis.rows %}
+                        <tr class="{% if r.danger %}table-warning{% endif %}">
+                            <td>{% include 'includes/type_badge.html' with type=r.type small=True %}</td>
+                            <td class="text-center">{% if r.weak %}<span class="count-pill bad">{{ r.weak }}</span>{% else %}–{% endif %}</td>
+                            <td class="text-center">{% if r.resist %}<span class="count-pill good">{{ r.resist }}</span>{% else %}–{% endif %}</td>
+                            <td class="text-center">{% if r.immune %}<span class="count-pill neutral">{{ r.immune }}</span>{% else %}–{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h2 class="h5 fw-bold">Offensive Abdeckung</h2>
+                    <p class="small text-muted">Gegen welche Typen hat dein Team einen sehr effektiven Angriffstyp (eigener Typ des Pokémon)?</p>
+                    <div class="d-flex flex-wrap gap-1 mb-3">
+                        {% for c in analysis.coverage %}
+                        <span class="type-badge sm {% if not c.covered %}faded{% endif %}" style="--type-color: {{ c.type.color }}"
+                              title="{% if c.covered %}getroffen von: {% for t in c.by %}{{ t.name }} {% endfor %}{% else %}keine Abdeckung{% endif %}">{{ c.type.name }}</span>
+                        {% endfor %}
+                    </div>
+                    {% if analysis.uncovered %}
+                    <div class="small"><strong>Nicht abgedeckt:</strong> {% for t in analysis.uncovered %}{{ t.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</div>
+                    {% else %}
+                    <div class="small text-success"><i class="bi bi-check-circle"></i> Dein Team trifft jeden Typ sehr effektiv!</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

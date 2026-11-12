@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Nicht gefunden{% endblock %}
+{% block content %}
+<div class="container py-5 text-center">
+    <span class="pokeball-icon lg"></span>
+    <h1 class="display-6 fw-bold mt-3">404 – Ein wildes Nichts erscheint!</h1>
+    <p class="text-muted">Die Seite oder das Pokémon gibt es leider nicht.</p>
+    <a href="{% url 'pokedex:list' %}" class="btn btn-danger">Zum Pokédex</a>
+</div>
+{% endblock %}
